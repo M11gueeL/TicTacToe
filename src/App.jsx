@@ -27,7 +27,9 @@ function Board({ xIsNext, squares, onPlay }) {
   let status;
 
   if (winner) {
-    status = 'Ganador: ' + winner;
+    status = '¡Ganador: ' + winner + "!";
+  } else if (squares.every(square => square !== null)) {
+    status = '¡Empate!'
   } else {
     status = 'Siguiente jugador: ' + (xIsNext ? 'X' : 'O');
   }
@@ -70,19 +72,30 @@ export default function Game() {
     setCurrentMove(nextMove);
   }
 
+  function resetGame() {
+  setHistory([Array(9).fill(null)]);
+  setCurrentMove(0);
+  }
+
+  const gameHasStarted = history.length > 1 || currentSquares.some(square => square !== null);
+
   const moves = history.map((squares, move) => {
-    let description;
-    if (move > 0) {
-      description = 'Ir hacia la jugada número ' + move;
-    } else {
-      description = 'Reiniciar el juego';
-    }
-    return (
-      <li key={move}>
-        <button onClick={() => jumpTo(move)}>{description}</button>
-      </li>
-    );
-  });
+  let description;
+  if (move > 0) {
+    description = 'Ir hacia la jugada número ' + move;
+  } else if (move === 0 && gameHasStarted) {
+    description = 'Reiniciar el juego';
+  } else {
+    return null; // No mostrar ningún botón si el juego no ha comenzado
+  }
+  return (
+    <li key={move}>
+      <button onClick={() => move === 0 ? resetGame() : jumpTo(move)}>
+        {description}
+      </button>
+    </li>
+  );
+}).filter(Boolean); // Eliminar los elementos null de la lista
 
   return (
     <div className="game">
