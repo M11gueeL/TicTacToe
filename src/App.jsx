@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 function Square({ value, onSquareClick }) {
   return (
-    <button className="square" onClick={onSquareClick}>{value}</button>
+    <button className="square text-center w-18 h-20 text-xl md:text-2xl font-bold bg-gray-200 md:hover:scale-95 hover:bg-gray-300" onClick={onSquareClick}>{value}</button>
   );
 }
 
@@ -24,7 +24,7 @@ function Board({ xIsNext, squares, onPlay }) {
   }
 
   const winner = calculateWinner(squares);
-  let status;
+  var status;
 
   if (winner) {
     status = '¡Ganador: ' + winner + "!";
@@ -36,75 +36,45 @@ function Board({ xIsNext, squares, onPlay }) {
 
   return (
     <>
-      <div className="status">{status}</div>
-      <div className="board-row">
-        <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
-        <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
-        <Square value={squares[2]} onSquareClick={() => handleClick(2)} />
+      <div className="grid grid-cols-3 gap-1 px-10 py-2 sm:px-28 md:px-56 lg:px-80 xl:px-96">
+        {squares.map((square, i) => (
+          <Square key={i} value={square} onSquareClick={() => handleClick(i)} />
+        ))}
       </div>
-      <div className="board-row">
-        <Square value={squares[3]} onSquareClick={() => handleClick(3)} />
-        <Square value={squares[4]} onSquareClick={() => handleClick(4)} />
-        <Square value={squares[5]} onSquareClick={() => handleClick(5)} />
-      </div>
-      <div className="board-row">
-        <Square value={squares[6]} onSquareClick={() => handleClick(6)} />
-        <Square value={squares[7]} onSquareClick={() => handleClick(7)} />
-        <Square value={squares[8]} onSquareClick={() => handleClick(8)} />
+      <div className="status p-4 flex justify-center">
+        <button className="bg-black font-semibold text-white rounded-xl py-4 px-6">{status}</button>
       </div>
     </>
   );
 }
 
 export default function Game() {
-  const [history, setHistory] = useState([Array(9).fill(null)]);
-  const [currentMove, setCurrentMove] = useState(0);
-  const xIsNext = currentMove % 2 === 0;
-  const currentSquares = history[currentMove];
+  const [squares, setSquares] = useState(Array(9).fill(null));
+  const [xIsNext, setXIsNext] = useState(true);
 
   function handlePlay(nextSquares) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
-    setHistory(nextHistory);
-    setCurrentMove(nextHistory.length - 1);
-  }
-
-  function jumpTo(nextMove) {
-    setCurrentMove(nextMove);
+    setSquares(nextSquares);
+    setXIsNext(!xIsNext);
   }
 
   function resetGame() {
-  setHistory([Array(9).fill(null)]);
-  setCurrentMove(0);
+    setSquares(Array(9).fill(null));
+    setXIsNext(true);
   }
 
-  const gameHasStarted = history.length > 1 || currentSquares.some(square => square !== null);
-
-  const moves = history.map((squares, move) => {
-  let description;
-  if (move > 0) {
-    description = 'Ir hacia la jugada número ' + move;
-  } else if (move === 0 && gameHasStarted) {
-    description = 'Reiniciar el juego';
-  } else {
-    return null; // No mostrar ningún botón si el juego no ha comenzado
-  }
   return (
-    <li key={move}>
-      <button onClick={() => move === 0 ? resetGame() : jumpTo(move)}>
-        {description}
-      </button>
-    </li>
-  );
-}).filter(Boolean); // Eliminar los elementos null de la lista
+    <div className="w-screen h-screen bg-zinc-100">
+      
+      <div className="game-info text-center py-6">
+        <button onClick={resetGame} className="p-4 bg-sky-500 text-white font-bold rounded-xl transition duration-300 ease-in-out transform hover:scale-105">
+          Reiniciar el juego
+        </button>
+      </div>
 
-  return (
-    <div className="game">
       <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+        <Board xIsNext={xIsNext} squares={squares} onPlay={handlePlay} />
       </div>
-      <div className="game-info">
-        <ol>{moves}</ol>
-      </div>
+
     </div>
   );
 }
@@ -128,4 +98,3 @@ function calculateWinner(squares) {
   }
   return null;
 }
-
